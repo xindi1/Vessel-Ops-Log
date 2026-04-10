@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f3b67" />
+  <title>Vessel Ops Log</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Applied Systems</p>
+        <h1>Vessel Ops Log</h1>
+        <p class="subhead">Air-gapped trip, conditions, performance, and maintenance tracking.</p>
+      </div>
+      <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">◐</button>
+    </header>
+
+    <section class="hero-card">
+      <div class="hero-meta">
+        <span id="todayDate"></span>
+        <span class="pill" id="seasonPill">On the water</span>
+      </div>
+      <div class="hero-grid">
+        <article class="stat-card">
+          <span class="stat-label">Trips</span>
+          <strong id="tripCount">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Hours</span>
+          <strong id="hoursCount">0.0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Flags</span>
+          <strong id="flagCount">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">This month</span>
+          <strong id="monthCount">0</strong>
+        </article>
+      </div>
+    </section>
+
+    <nav class="tabbar" aria-label="Primary">
+      <button class="tab active" data-tab="today">Today</button>
+      <button class="tab" data-tab="log">Quick Log</button>
+      <button class="tab" data-tab="trips">Trips</button>
+      <button class="tab" data-tab="maintenance">Maintenance</button>
+      <button class="tab" data-tab="patterns">Patterns</button>
+    </nav>
+
+    <main>
+      <section class="tab-panel active" id="panel-today">
+        <div class="panel-grid">
+          <article class="card">
+            <div class="card-head">
+              <h2>Fast actions</h2>
+              <span class="muted">One-tap logging</span>
+            </div>
+            <div class="quick-grid">
+              <button class="quick-btn" data-preset="Trip">Log trip</button>
+              <button class="quick-btn" data-preset="Fuel">Fuel note</button>
+              <button class="quick-btn" data-preset="Issue">Issue flag</button>
+              <button class="quick-btn" data-preset="Maintenance">Maintenance</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <h2>Today timeline</h2>
+              <button id="clearTodayFilter" class="text-btn">Show all</button>
+            </div>
+            <div id="todayTimeline" class="timeline empty-state">No entries yet today.</div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <h2>Latest watch item</h2>
+            </div>
+            <div id="latestWatch" class="watch-box empty-state">No active watch items.</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="panel-log">
+        <article class="card form-card">
+          <div class="card-head">
+            <h2>Quick log</h2>
+            <span class="muted">Capture a trip, note, or maintenance flag fast.</span>
+          </div>
+          <form id="logForm" class="form-grid">
+            <label>
+              Entry type
+              <select id="entryType" required>
+                <option value="Trip">Trip</option>
+                <option value="Fuel">Fuel</option>
+                <option value="Issue">Issue</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Observation">Observation</option>
+              </select>
+            </label>
+            <label>
+              Vessel / label
+              <input id="vesselName" type="text" placeholder="Pontoon, ski boat, Sea Ray" />
+            </label>
+            <label>
+              Start / timestamp
+              <input id="startTime" type="datetime-local" />
+            </label>
+            <label>
+              End time
+              <input id="endTime" type="datetime-local" />
+            </label>
+            <label>
+              Duration (hours)
+              <input id="duration" type="number" min="0" step="0.1" placeholder="Optional if start/end set" />
+            </label>
+            <label>
+              Location / route
+              <input id="location" type="text" placeholder="Lake Norman / cove / route" />
+            </label>
+            <label>
+              Purpose
+              <select id="purpose">
+                <option value="">Select</option>
+                <option>Leisure</option>
+                <option>Fishing</option>
+                <option>Transport</option>
+                <option>Watersports</option>
+                <option>Maintenance run</option>
+              </select>
+            </label>
+            <label>
+              Conditions
+              <input id="conditions" type="text" placeholder="Calm, choppy, windy, crowded" />
+            </label>
+            <label>
+              Fuel used / note
+              <input id="fuel" type="text" placeholder="Optional" />
+            </label>
+            <label>
+              Performance
+              <select id="performance">
+                <option value="">Select</option>
+                <option>Smooth</option>
+                <option>Normal</option>
+                <option>Rough</option>
+                <option>Delayed start</option>
+                <option>Needs attention</option>
+              </select>
+            </label>
+            <label>
+              Flag severity
+              <select id="severity">
+                <option value="">Select</option>
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
+            </label>
+            <label class="full">
+              Notes
+              <textarea id="notes" rows="4" placeholder="What happened, what to watch, what to repeat."></textarea>
+            </label>
+            <div class="chip-row full">
+              <button type="button" class="chip" data-duration="1">1h</button>
+              <button type="button" class="chip" data-duration="2">2h</button>
+              <button type="button" class="chip" data-duration="3">3h</button>
+              <button type="button" class="chip" data-duration="4">4h</button>
+              <button type="button" class="chip" data-duration="6">6h</button>
+            </div>
+            <div class="form-actions full">
+              <button type="submit" class="primary-btn">Save entry</button>
+              <button type="button" id="resetForm" class="secondary-btn">Clear</button>
+            </div>
+          </form>
+        </article>
+      </section>
+
+      <section class="tab-panel" id="panel-trips">
+        <article class="card">
+          <div class="card-head">
+            <h2>Trip history</h2>
+            <div class="inline-tools">
+              <input id="searchInput" type="search" placeholder="Search location, vessel, note" />
+              <select id="typeFilter">
+                <option value="all">All types</option>
+                <option value="Trip">Trip</option>
+                <option value="Fuel">Fuel</option>
+                <option value="Issue">Issue</option>
+                <option value="Maintenance">Maintenance</option>
+                <option value="Observation">Observation</option>
+              </select>
+            </div>
+          </div>
+          <div id="tripList" class="list-stack empty-state">No entries saved yet.</div>
+        </article>
+      </section>
+
+      <section class="tab-panel" id="panel-maintenance">
+        <article class="card">
+          <div class="card-head">
+            <h2>Maintenance watchlist</h2>
+            <span class="muted">Open issues and completed work</span>
+          </div>
+          <div id="maintenanceList" class="list-stack empty-state">No maintenance items yet.</div>
+        </article>
+      </section>
+
+      <section class="tab-panel" id="panel-patterns">
+        <div class="panel-grid">
+          <article class="card">
+            <div class="card-head">
+              <h2>Pattern summary</h2>
+            </div>
+            <div id="patternSummary" class="summary-grid"></div>
+          </article>
+          <article class="card">
+            <div class="card-head">
+              <h2>Data tools</h2>
+            </div>
+            <div class="tool-grid">
+              <button id="exportJson" class="secondary-btn">Export JSON</button>
+              <button id="importBtn" class="secondary-btn">Import JSON</button>
+              <button id="exportCsv" class="secondary-btn">Export CSV</button>
+              <button id="seedDemo" class="secondary-btn">Load demo</button>
+            </div>
+            <input id="importFile" type="file" accept="application/json" hidden />
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
