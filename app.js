@@ -50,7 +50,22 @@ function saveEntries() {
 function fmtDateTime(iso) {
   if (!iso) return 'No time set';
   const d = new Date(iso);
-  return d.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+  return d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function toLocalInputValue(date = new Date()) {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
+function localInputToIso(value) {
+  return value ? new Date(value).toISOString() : '';
+}
+
+function syncDurationFromTimes() {
+  if (!els.startTime.value || !els.endTime.value) return;
+  const ms = new Date(els.endTime.value) - new Date(els.startTime.value);
+  if (ms > 0) els.duration.value = (ms / 36e5).toFixed(1).replace(/\.0$/, '');
 }
 
 function fmtDate(iso) {
@@ -197,7 +212,8 @@ function setTab(tabName) {
 
 function resetForm() {
   document.getElementById('logForm').reset();
-  els.startTime.value = new Date().toISOString().slice(0,16);
+  els.startTime.value = toLocalInputValue();
+  els.endTime.value = '';
 }
 
 function handleSubmit(event) {
@@ -207,8 +223,8 @@ function handleSubmit(event) {
     createdAt: new Date().toISOString(),
     entryType: els.entryType.value,
     vesselName: els.vesselName.value.trim(),
-    startTime: els.startTime.value || new Date().toISOString(),
-    endTime: els.endTime.value || '',
+    startTime: localInputToIso(els.startTime.value) || new Date().toISOString(),
+    endTime: localInputToIso(els.endTime.value) || '',
     duration: els.duration.value || '',
     location: els.location.value.trim(),
     purpose: els.purpose.value,
@@ -324,11 +340,13 @@ function init() {
   document.getElementById('seedDemo').addEventListener('click', seedDemo);
   document.getElementById('clearTodayFilter').addEventListener('click', () => setTab('trips'));
   els.importFile.addEventListener('change', e => e.target.files[0] && importJson(e.target.files[0]));
+  els.startTime.addEventListener('change', syncDurationFromTimes);
+  els.endTime.addEventListener('change', syncDurationFromTimes);
   els.searchInput.addEventListener('input', renderTrips);
   els.typeFilter.addEventListener('change', renderTrips);
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
+    navigator.serviceWorker.register('service-worker.js').then(reg => reg.update()).catch(console.error);
   }
 }
 

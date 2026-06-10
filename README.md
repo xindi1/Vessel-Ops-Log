@@ -30,3 +30,11 @@ http://localhost:8080
 ## Notes
 - Data is stored in localStorage on the device/browser.
 - To refresh the service worker after changes, do a hard refresh.
+
+
+## v1.1 updates
+- Compact mobile date/time boxes.
+- Start/end times save from local selections into ISO.
+- Duration auto-fills when start and end times are set.
+- Updated uploaded app icons.
+- Service worker cache bumped for redeploy.
